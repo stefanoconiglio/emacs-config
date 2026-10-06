@@ -661,6 +661,40 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
             (when (eql 0 (call-process "wl-paste" nil (list t nil) nil "-n"))
               (buffer-string))))))
 
+;; Maximize a pane: C-c z makes the selected window fill the frame; C-c z again
+;; brings back the panes as they were (with point where you left it in the
+;; maximized buffer).  winner-mode: C-c <left> undoes any other change of the
+;; panes (C-x 1, C-x 0, a split), C-c <right> redoes it.
+(defun my-refit-pdf-windows ()
+  "Redraw the PDFs shown at the size of their panes.
+pdf-tools does it by itself, except while text is selected in the PDF."
+  (dolist (w (window-list nil 'nomini))
+    (with-current-buffer (window-buffer w)
+      (when (and (derived-mode-p 'pdf-view-mode) (fboundp 'pdf-view-redisplay))
+        (pdf-view-redisplay w)))))
+
+(defun my-toggle-maximize-window ()
+  "Make the selected window fill the frame; called again, restore the panes."
+  (interactive)
+  (let ((saved (frame-parameter nil 'my-maximize-saved)))
+    (if (and saved (one-window-p t))
+        (let ((buf (current-buffer))
+              (pt (point)))
+          (set-frame-parameter nil 'my-maximize-saved nil)
+          (set-window-configuration saved)
+          ;; back to the pane of the buffer that was maximized, at its point
+          (when-let* ((w (get-buffer-window buf)))
+            (select-window w)
+            (set-window-point w pt))
+          (my-refit-pdf-windows))
+      (if (one-window-p t)
+          (message "Only one pane: nothing to maximize")
+        (set-frame-parameter nil 'my-maximize-saved (current-window-configuration))
+        (delete-other-windows)
+        (my-refit-pdf-windows)))))
+(global-set-key (kbd "C-c z") #'my-toggle-maximize-window)
+(winner-mode 1)
+
 ;; mouse suport in emacs --nw
 (xterm-mouse-mode 1)
 
