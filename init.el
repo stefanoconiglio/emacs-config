@@ -661,6 +661,9 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
             (when (eql 0 (call-process "wl-paste" nil (list t nil) nil "-n"))
               (buffer-string))))))
 
+;; No toolbar (the row of icons under the menu bar).
+(tool-bar-mode -1)
+
 ;; Maximize a pane: C-c z makes the selected window fill the frame; C-c z again
 ;; brings back the panes as they were (with point where you left it in the
 ;; maximized buffer).  winner-mode: C-c <left> undoes any other change of the
