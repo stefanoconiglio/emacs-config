@@ -664,6 +664,84 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 ;; No toolbar (the row of icons under the menu bar).
 (tool-bar-mode -1)
 
+;; A draggable bar between side-by-side panes.  With scroll bars on the right
+;; there is none: the line between two panes is the left pane's scroll bar,
+;; and dragging it scrolls.  Drag the bar to resize; or C-x } / C-x { (then
+;; } and { again) to widen / narrow the selected pane, C-x + to even them out.
+(setq window-divider-default-places 'right-only
+      window-divider-default-right-width 6)
+(window-divider-mode 1)
+
+;; ===============================
+;; ZOOM, as in a terminal: one size for all of Emacs
+;; ===============================
+;; C-+ (or C-=) bigger, C-- smaller, C-0 back to the starting size.  Like the
+;; terminal's Ctrl +/-/0: the font of the whole of Emacs (every pane, the mode
+;; lines) changes by half a point per press, and the window keeps its size.
+;; After the first press, plain + - 0 go on too.  The command is Emacs's own
+;; `global-text-scale-adjust'; it reads which key called it.
+;; Emacs's per-buffer zoom keys (C-x C-+ / C-x C-- / C-x C-0, and C-mouse
+;; wheel) are sent to the same global zoom, so no pane ends up with a size of
+;; its own; and C-0 also clears any per-buffer zoom left over (a mode line
+;; showing e.g. "+6" after the mode name).
+;; A PDF's page does not grow with the font: in a PDF, + and - zoom the page
+;; to a fixed size, which stays when the pane is resized later; 0 shows it at
+;; 100%, not fitted; W / P fit the width / the whole page again (C-mouse wheel
+;; stays pdf-tools').
+;; These keys replace two defaults, still on other keys: C-- was
+;; negative-argument (also M--), C-0 was digit-argument (also M-0).
+(defun my-zoom (increment)
+  "Zoom all of Emacs as a terminal does; on 0, also clear per-buffer zooms."
+  (interactive "p")
+  (when (eq (event-basic-type last-command-event) ?0)
+    (dolist (b (buffer-list))
+      (with-current-buffer b
+        (when (bound-and-true-p text-scale-mode)
+          (text-scale-set 0)))))
+  (global-text-scale-adjust increment))
+(global-set-key (kbd "C-+") #'my-zoom)
+(global-set-key (kbd "C-=") #'my-zoom)
+(global-set-key (kbd "C--") #'my-zoom)
+(global-set-key (kbd "C-0") #'my-zoom)
+(global-set-key [remap text-scale-adjust] #'my-zoom)
+(global-set-key [remap mouse-wheel-text-scale] #'mouse-wheel-global-text-scale)
+
+;; ===============================
+;; COMPLETION in LaTeX, as in Overleaf
+;; ===============================
+;; While you type, a list pops up: commands (\sec -> \section, \emp -> \emph),
+;; environments (\begin{ite -> itemize), your labels in \ref{...}, your
+;; bibliography keys in \cite{...} (with author and title), files in
+;; \includegraphics{...} and \input{...}.  Plain words get no list.
+;; In the list: TAB or RET takes the highlighted entry, M-n / M-p (or the
+;; arrows) move, C-g closes it; typing on closes it too.
+;; How: texlab (the pacman package texlab), a LaTeX "language server" that
+;; knows LaTeX's commands, the packages a document loads, and the document's
+;; labels and bibliography; eglot (built into Emacs) talks to it, one texlab
+;; per folder; company draws the list.  AUCTeX's own completion (C-M-i) lacks
+;; \section, \emph, \textbf and \begin, which it inserts with C-c C-s,
+;; C-c C-f C-e and C-c C-e instead.
+;; The spell checker's word completion is turned off in LaTeX buffers, so that
+;; ordinary words get no list.  To stop it in one buffer: M-x company-mode (the
+;; list) or M-x eglot-shutdown (texlab).
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '((LaTeX-mode :language-id "latex") . ("texlab")))
+  ;; no highlighting of every other occurrence of the word at point
+  (add-to-list 'eglot-ignored-server-capabilities :documentHighlightProvider)
+  ;; texlab stops when its last buffer is closed
+  (setq eglot-autoshutdown t))
+(defun my-latex-completion ()
+  "Overleaf-like completion in a LaTeX buffer: texlab through eglot, company's list."
+  (when (executable-find "texlab")
+    (remove-hook 'completion-at-point-functions #'ispell-completion-at-point t)
+    (setq-local company-backends '(company-capf)   ; only what texlab offers
+                company-idle-delay 0.2             ; the list after 0.2 s
+                company-minimum-prefix-length 1)   ; from the first letter
+    (company-mode 1)
+    (eglot-ensure)))
+(add-hook 'LaTeX-mode-hook #'my-latex-completion)
+
 ;; Maximize a pane: C-c z makes the selected window fill the frame; C-c z again
 ;; brings back the panes as they were (with point where you left it in the
 ;; maximized buffer).  winner-mode: C-c <left> undoes any other change of the
