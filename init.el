@@ -876,12 +876,19 @@ pdf-tools does it by itself, except while text is selected in the PDF."
 ;; Errors underlined as you type and completion of the document's functions
 ;; come from tinymist, Typst's language server (installed with mise), through
 ;; eglot, with company's list as in LaTeX.
-;; To see the slides: M-x typst-ts-watch-mode recompiles the PDF on every save
-;; (or `typst watch file.typ` in a terminal), and zathura shows the PDF and
-;; reloads it by itself.
+;; To see the slides: typst-ts-watch-mode (on by default, " [Watch]" in the
+;; mode line; M-x typst-ts-watch-mode turns it off) runs `typst watch`, which
+;; recompiles the PDF on every save, with its errors in *Typst-Watch*; zathura
+;; shows the PDF and reloads it by itself.  Not on Hololith's theme.typ, a
+;; library of functions with no slides of its own.
 (use-package typst-ts-mode
   :vc (:url "https://codeberg.org/meow_king/typst-ts-mode" :rev :newest)
   :mode "\\.typ\\'"
+  :config
+  ;; typst by its mise shim's full path, for an Emacs started from the launcher
+  (let ((typst (expand-file-name "~/.local/share/mise/shims/typst")))
+    (when (file-executable-p typst)
+      (setq typst-ts-compile-executable-location typst)))
   :init
   (with-eval-after-load 'treesit
     (add-to-list 'treesit-language-source-alist
@@ -898,3 +905,9 @@ pdf-tools does it by itself, except while text is selected in the PDF."
     (company-mode 1)
     (eglot-ensure)))
 (add-hook 'typst-ts-mode-hook #'my-typst-completion)
+(defun my-typst-watch ()
+  "Recompile the PDF on every save: typst-ts-watch-mode, on unless the file is a theme."
+  (when (and buffer-file-name
+             (not (string= (file-name-nondirectory buffer-file-name) "theme.typ")))
+    (typst-ts-watch-mode 1)))
+(add-hook 'typst-ts-mode-hook #'my-typst-watch)
