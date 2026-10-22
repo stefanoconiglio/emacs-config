@@ -867,3 +867,34 @@ pdf-tools does it by itself, except while text is selected in the PDF."
                (side . bottom)
                (slot . 0)
                (window-height . 0.1)))
+
+;; Typst (.typ files, e.g. the slides ported from Obsidian by Hololith):
+;; colours and indentation from typst-ts-mode (installed from its git
+;; repository on Codeberg: it is not on MELPA), which needs the Typst
+;; tree-sitter grammar (~/.emacs.d/tree-sitter/libtree-sitter-typst.so; to
+;; rebuild it: M-x treesit-install-language-grammar RET typst RET).
+;; Errors underlined as you type and completion of the document's functions
+;; come from tinymist, Typst's language server (installed with mise), through
+;; eglot, with company's list as in LaTeX.
+;; To see the slides: M-x typst-ts-watch-mode recompiles the PDF on every save
+;; (or `typst watch file.typ` in a terminal), and zathura shows the PDF and
+;; reloads it by itself.
+(use-package typst-ts-mode
+  :vc (:url "https://codeberg.org/meow_king/typst-ts-mode" :rev :newest)
+  :mode "\\.typ\\'"
+  :init
+  (with-eval-after-load 'treesit
+    (add-to-list 'treesit-language-source-alist
+                 '(typst "https://github.com/uben0/tree-sitter-typst"))))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               `(typst-ts-mode . (,(expand-file-name "~/.local/share/mise/shims/tinymist")))))
+(defun my-typst-completion ()
+  "Errors and completion in a Typst buffer: tinymist through eglot, company's list."
+  (when (file-executable-p (expand-file-name "~/.local/share/mise/shims/tinymist"))
+    (setq-local company-backends '(company-capf)
+                company-idle-delay 0.2
+                company-minimum-prefix-length 1)
+    (company-mode 1)
+    (eglot-ensure)))
+(add-hook 'typst-ts-mode-hook #'my-typst-completion)
