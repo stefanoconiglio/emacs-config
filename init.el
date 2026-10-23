@@ -663,8 +663,12 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
   (defun my-texpresso-this-file ()
     "Start TeXpresso on the file of this buffer, not on `TeX-master'.
 Its reruns are on: after a pause, if the .aux file changed, it typesets
-again with the previous pass's references."
+again with the previous pass's references.  Dyad is turned off in this
+buffer, so that saving does not also compile with latexmk next to
+TeXpresso; `M-x dyad-mode' turns it back on."
     (interactive)
+    (when (bound-and-true-p dyad-mode)
+      (dyad-mode -1))
     (texpresso (buffer-file-name))
     (when (process-live-p texpresso--process)
       (texpresso--send 'rerun t)))
