@@ -69,8 +69,10 @@
 (if (fboundp 'global-display-line-numbers-mode)
     (global-display-line-numbers-mode 1)
   (global-linum-mode t))
-(when (fboundp 'pixel-scroll-precision-mode)
-  (pixel-scroll-precision-mode 1))
+;; No pixel-precise scrolling (23 Oct 2026): scrolling a long LaTeX file spent
+;; 38% of its time in pixel-scroll-precision; whole lines are cheaper.
+;; (when (fboundp 'pixel-scroll-precision-mode)
+;;   (pixel-scroll-precision-mode 1))
 
 (defun my/python-fill-column ()
   "Show a helpful fill column marker in Python buffers."
