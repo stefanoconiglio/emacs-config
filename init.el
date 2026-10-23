@@ -630,6 +630,35 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 (when (and (or (display-graphic-p) (daemonp)) (require 'omarchy-follow nil t))
   (omarchy-follow-mode 1))
 
+;; ===============================
+;; ===============================
+;; TEXPRESSO: the PDF re-typeset as you type, in a window of its own
+;; https://github.com/let-def/texpresso, built in ~/Installs/texpresso
+;; (`make all'), the command linked in ~/.local/bin (not on the daemon's PATH,
+;; hence the full path).  Works in terminal Emacs too: the window is its own.
+;; M-x my-texpresso-this-file: TeXpresso on the file you are in.  Plain
+;; M-x texpresso starts it on `TeX-master', which a folder's .dir-locals.el may
+;; set to a file that \input's this one; edits to an \input file can then stop
+;; showing (seen 23 Oct 2026 with TeXpresso of 22 Jul 2026).
+;; TeXpresso runs XeTeX: a document set in T1 fonts (fontenc, lmodern) loses
+;; the ’ “ ” typed as such, unless its preamble loads fontspec under XeTeX.
+;; ===============================
+;; ===============================
+(add-to-list 'load-path "~/Installs/texpresso/emacs")
+(when (require 'texpresso nil t)
+  (setq texpresso-binary (expand-file-name "~/.local/bin/texpresso")
+        ;; the slide under the cursor, as texsync does
+        texpresso-follow-cursor t)
+  ;; In a terminal frame the default face has no colours, so texpresso.el
+  ;; sends (theme nil nil), which kills TeXpresso; skip that message.
+  (advice-add 'texpresso--send :before-until
+              (lambda (command &rest args)
+                (and (eq command 'theme) (memq nil args))))
+  (defun my-texpresso-this-file ()
+    "Start TeXpresso on the file of this buffer, not on `TeX-master'."
+    (interactive)
+    (texpresso (buffer-file-name))))
+
 ;; The daemon (emacs.service) can start before the graphical session sets
 ;; WAYLAND_DISPLAY, and then wl-copy, wl-paste and every other program it
 ;; runs cannot reach the desktop.  Take it from the first client frame that
