@@ -18,8 +18,8 @@ restart it (`systemctl --user restart emacs`) once everything is saved.
   Two are not on an archive and come from their repositories through `use-package :vc`:
   ampl-mode (github.com/ampl/ampl-mode) and claude-code-ide
   (github.com/manzaltu/claude-code-ide.el).
-- **Two checkouts**, loaded by the TEXSYNC block in graphical Emacs and in the daemon:
-  - [texsync](https://github.com/stefanoconiglio/emacs-texsync) at `~/repos/emacs-texsync`: LaTeX source and
+- **Two checkouts**, loaded by the DYAD block in graphical Emacs and in the daemon:
+  - [dyad](https://github.com/stefanoconiglio/emacs-latex-dyad) at `~/repos/emacs-latex-dyad`: LaTeX source and
     PDF side by side, kept in step both ways;
   - [emacs-omarchy-theme](https://github.com/stefanoconiglio/emacs-omarchy-theme) at
     `~/repos/emacs-omarchy-theme`: Emacs and its PDFs follow the Omarchy theme.
