@@ -577,7 +577,7 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
   :config
   (pdf-tools-install)
   (setq pdf-view-midnight-colors '("#FFFFFF" . "#000000"))
-  ;; white on black, unless omarchy-follow gives PDFs the Omarchy theme's colours (TEXSYNC below)
+  ;; white on black, unless omarchy-follow gives PDFs the Omarchy theme's colours (DYAD below)
   (add-hook 'pdf-view-mode-hook
             (lambda ()
               (unless (bound-and-true-p omarchy-follow-mode)
@@ -611,8 +611,8 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 
 ;; ===============================
 ;; ===============================
-;; TEXSYNC: source and PDF side by side, kept in step both ways
-;; https://github.com/stefanoconiglio/emacs-texsync (~/repos/emacs-texsync)
+;; DYAD: source and PDF side by side, kept in step both ways (was texsync until 23 Oct 2026)
+;; https://github.com/stefanoconiglio/emacs-latex-dyad (~/repos/emacs-latex-dyad)
 ;; Only in graphical Emacs (/usr/bin/emacs): C-c C-v and C-c C-c View show
 ;; the PDF in pdf-tools on the right.  Terminal Emacs (emacs -nw) keeps Zathura.
 ;; omarchy-follow: Emacs and the PDF in the colours of the Omarchy theme,
@@ -622,11 +622,11 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 ;; graphical frame, so `display-graphic-p' alone would skip it.
 ;; ===============================
 ;; ===============================
-(add-to-list 'load-path "~/repos/emacs-texsync")
+(add-to-list 'load-path "~/repos/emacs-latex-dyad")
 (add-to-list 'load-path "~/repos/emacs-omarchy-theme")
-(when (require 'texsync nil t)
+(when (require 'dyad nil t)
   (add-hook 'LaTeX-mode-hook
-            (lambda () (when (display-graphic-p) (texsync-mode 1)))))
+            (lambda () (when (display-graphic-p) (dyad-mode 1)))))
 (when (and (or (display-graphic-p) (daemonp)) (require 'omarchy-follow nil t))
   (omarchy-follow-mode 1))
 
@@ -649,7 +649,7 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 (add-to-list 'load-path "~/Installs/texpresso/emacs")
 (when (require 'texpresso nil t)
   (setq texpresso-binary (expand-file-name "~/.local/bin/texpresso")
-        ;; the slide under the cursor, as texsync does
+        ;; the slide under the cursor, as dyad does
         texpresso-follow-cursor t)
   ;; In a terminal frame the default face has no colours, so texpresso.el
   ;; sends (theme nil nil), which kills TeXpresso; skip that message.
