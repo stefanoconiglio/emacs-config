@@ -637,8 +637,12 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 ;; (`make all'), the command linked in ~/.local/bin (not on the daemon's PATH,
 ;; hence the full path).  Works in terminal Emacs too: the window is its own.
 ;; M-x my-texpresso-this-file: TeXpresso on the file you are in, with its
-;; reruns on (beamer's "n / total", the contents and \ref need the .aux of a
-;; previous pass; without them the total reads 1).  Plain
+;; reruns on: after a pause, when the .aux changed, one more pass with the
+;; previous pass's .aux, which beamer's "n / total", the contents and \ref need
+;; (without it the total reads 1).  C-c r: such a pass at once.  The reruns
+;; need the branch latexdown-rerun-fixes of ~/Installs/texpresso: upstream, an
+;; edit typed as a rerun pass started killed TeX for good, and one after it
+;; could crash TeXpresso (23 Oct 2026; ~/repos/latexdown/LOG.md).  Plain
 ;; M-x texpresso starts it on `TeX-master', which a folder's .dir-locals.el may
 ;; set to a file that \input's this one; edits to an \input file can then stop
 ;; showing (seen 23 Oct 2026 with TeXpresso of 22 Jul 2026).
@@ -658,13 +662,22 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
                 (and (eq command 'theme) (memq nil args))))
   (defun my-texpresso-this-file ()
     "Start TeXpresso on the file of this buffer, not on `TeX-master'.
-Also turn on its reruns: after a pause in typing, if the .aux file changed,
-it typesets again with the previous pass's references, as a second pdflatex
-pass would (beamer's total slide count, the table of contents, \\ref)."
+Its reruns are on: after a pause, if the .aux file changed, it typesets
+again with the previous pass's references."
     (interactive)
     (texpresso (buffer-file-name))
     (when (process-live-p texpresso--process)
-      (texpresso--send 'rerun t))))
+      (texpresso--send 'rerun t)))
+  (defun my-texpresso-rerun ()
+    "Have TeXpresso typeset once more with the previous pass's .aux file,
+as a second pdflatex pass would (beamer's total slide count, the table of
+contents, \\ref)."
+    (interactive)
+    (if (process-live-p texpresso--process)
+        (texpresso--send 'rerun-once)
+      (message "TeXpresso is not running: M-x my-texpresso-this-file")))
+  (with-eval-after-load 'latex
+    (define-key LaTeX-mode-map (kbd "C-c r") #'my-texpresso-rerun)))
 
 ;; The daemon (emacs.service) can start before the graphical session sets
 ;; WAYLAND_DISPLAY, and then wl-copy, wl-paste and every other program it
