@@ -636,7 +636,9 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 ;; https://github.com/let-def/texpresso, built in ~/Installs/texpresso
 ;; (`make all'), the command linked in ~/.local/bin (not on the daemon's PATH,
 ;; hence the full path).  Works in terminal Emacs too: the window is its own.
-;; M-x my-texpresso-this-file: TeXpresso on the file you are in.  Plain
+;; M-x my-texpresso-this-file: TeXpresso on the file you are in, with its
+;; reruns on (beamer's "n / total", the contents and \ref need the .aux of a
+;; previous pass; without them the total reads 1).  Plain
 ;; M-x texpresso starts it on `TeX-master', which a folder's .dir-locals.el may
 ;; set to a file that \input's this one; edits to an \input file can then stop
 ;; showing (seen 23 Oct 2026 with TeXpresso of 22 Jul 2026).
@@ -655,9 +657,14 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
               (lambda (command &rest args)
                 (and (eq command 'theme) (memq nil args))))
   (defun my-texpresso-this-file ()
-    "Start TeXpresso on the file of this buffer, not on `TeX-master'."
+    "Start TeXpresso on the file of this buffer, not on `TeX-master'.
+Also turn on its reruns: after a pause in typing, if the .aux file changed,
+it typesets again with the previous pass's references, as a second pdflatex
+pass would (beamer's total slide count, the table of contents, \\ref)."
     (interactive)
-    (texpresso (buffer-file-name))))
+    (texpresso (buffer-file-name))
+    (when (process-live-p texpresso--process)
+      (texpresso--send 'rerun t))))
 
 ;; The daemon (emacs.service) can start before the graphical session sets
 ;; WAYLAND_DISPLAY, and then wl-copy, wl-paste and every other program it
