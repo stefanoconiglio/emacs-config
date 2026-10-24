@@ -1,11 +1,11 @@
-# Emacs customizations
+# Stefano Coniglio's Emacs configuration
 
 My Emacs init file, `init.el`. It is the live file, not a copy: `~/.emacs.d/init.el` is a
 symlink to it.
 
 ```
-git clone https://github.com/stefanoconiglio/emacs-customizations ~/repos/emacs-customizations
-ln -s ~/repos/emacs-customizations/init.el ~/.emacs.d/init.el
+git clone https://github.com/stefanoconiglio/emacs-config ~/repos/emacs-config
+ln -s ~/repos/emacs-config/init.el ~/.emacs.d/init.el
 ```
 
 Written for Emacs 31 on Omarchy (Arch Linux), started mostly as a daemon (`emacs.service`) and
@@ -48,6 +48,7 @@ opens its menu in graphical frames (a terminal cannot send `C-'` to `emacs -nw`)
   (`emacs -nw`) as Omarchy's default editor.
 - Until 2026-10-03 this file was `home/.emacs.d/init.el` in omarchy-customizations (now omarchy-config), the private
   repository of the rest of the machine's customizations, which keeps its earlier history.
+- Until 2026-10-24 this repository was emacs-customizations.
 
 ## License
 
