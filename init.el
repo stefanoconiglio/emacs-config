@@ -579,7 +579,7 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
   :config
   (pdf-tools-install)
   (setq pdf-view-midnight-colors '("#FFFFFF" . "#000000"))
-  ;; white on black, unless omarchy-follow gives PDFs the Omarchy theme's colours (DYAD below)
+  ;; white on black, unless omarchy-follow gives PDFs the Omarchy theme's colours (PDF-VIEW-SCROLL-SYNC below)
   (add-hook 'pdf-view-mode-hook
             (lambda ()
               (unless (bound-and-true-p omarchy-follow-mode)
@@ -613,8 +613,9 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 
 ;; ===============================
 ;; ===============================
-;; DYAD: source and PDF side by side, kept in step both ways (was texsync until 23 Oct 2026)
-;; https://github.com/stefanoconiglio/emacs-latex-dyad (~/repos/emacs-latex-dyad)
+;; PDF-VIEW-SCROLL-SYNC: source and PDF side by side, kept in step both ways
+;; (texsync until 23 Oct 2026, dyad until 24 Oct 2026)
+;; https://github.com/stefanoconiglio/emacs-pdf-view-scroll-sync (~/repos/emacs-pdf-view-scroll-sync)
 ;; Only in graphical Emacs (/usr/bin/emacs): C-c C-v and C-c C-c View show
 ;; the PDF in pdf-tools on the right.  Terminal Emacs (emacs -nw) keeps Zathura.
 ;; omarchy-follow: Emacs and the PDF in the colours of the Omarchy theme,
@@ -624,66 +625,43 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 ;; graphical frame, so `display-graphic-p' alone would skip it.
 ;; ===============================
 ;; ===============================
-(add-to-list 'load-path "~/repos/emacs-latex-dyad")
+(add-to-list 'load-path "~/repos/emacs-pdf-view-scroll-sync")
 (add-to-list 'load-path "~/repos/emacs-omarchy-theme")
-(when (require 'dyad nil t)
+(when (require 'pdf-view-scroll-sync nil t)
   (add-hook 'LaTeX-mode-hook
-            (lambda () (when (display-graphic-p) (dyad-mode 1)))))
+            (lambda () (when (display-graphic-p) (pdf-view-scroll-sync-mode 1)))))
 (when (and (or (display-graphic-p) (daemonp)) (require 'omarchy-follow nil t))
   (omarchy-follow-mode 1))
 
 ;; ===============================
 ;; ===============================
-;; TEXPRESSO: the PDF re-typeset as you type, in a window of its own
-;; https://github.com/let-def/texpresso, built in ~/Installs/texpresso
-;; (`make all'), the command linked in ~/.local/bin (not on the daemon's PATH,
-;; hence the full path).  Works in terminal Emacs too: the window is its own.
-;; M-x my-texpresso-this-file: TeXpresso on the file you are in, with its
-;; reruns on: after a pause, when the .aux changed, one more pass with the
-;; previous pass's .aux, which beamer's "n / total", the contents and \ref need
-;; (without it the total reads 1).  C-c r: such a pass at once.  The reruns
-;; need the branch latexdown-rerun-fixes of ~/Installs/texpresso: upstream, an
-;; edit typed as a rerun pass started killed TeX for good, and one after it
-;; could crash TeXpresso (23 Oct 2026; ~/repos/latexdown/LOG.md).  Plain
-;; M-x texpresso starts it on `TeX-master', which a folder's .dir-locals.el may
-;; set to a file that \input's this one; edits to an \input file can then stop
-;; showing (seen 23 Oct 2026 with TeXpresso of 22 Jul 2026).
+;; TEXPRESSO-VIEW: the page re-typeset as you type, in the window to the right
+;; https://github.com/stefanoconiglio/emacs-texpresso-view (~/repos/emacs-texpresso-view)
+;; M-x texpresso-view in a LaTeX buffer: TeXpresso on that file (not on
+;; `TeX-master'), with no window of its own and its reruns on, its page on the
+;; right as pdf-tools shows a PDF; click → source line, drag → copy, n / p turn
+;; pages.  Again in the same buffer: closed.  pdf-view-scroll-sync is turned
+;; off in that buffer.  Graphical Emacs only (it shows images).
+;; TeXpresso (https://github.com/let-def/texpresso) is built in
+;; ~/Installs/texpresso, branch texpresso-view (the package's texpresso/
+;; patches: its editor commands and rerun fixes), `make all', the command
+;; linked in ~/.local/bin (not on the daemon's PATH, hence the full path).
 ;; TeXpresso runs XeTeX: a document set in T1 fonts (fontenc, lmodern) loses
 ;; the ’ “ ” typed as such, unless its preamble loads fontspec under XeTeX.
 ;; ===============================
 ;; ===============================
 (add-to-list 'load-path "~/Installs/texpresso/emacs")
+(add-to-list 'load-path "~/repos/emacs-texpresso-view")
 (when (require 'texpresso nil t)
   (setq texpresso-binary (expand-file-name "~/.local/bin/texpresso")
-        ;; the slide under the cursor, as dyad does
+        ;; the page under the cursor, as pdf-view-scroll-sync does
         texpresso-follow-cursor t)
   ;; In a terminal frame the default face has no colours, so texpresso.el
   ;; sends (theme nil nil), which kills TeXpresso; skip that message.
   (advice-add 'texpresso--send :before-until
               (lambda (command &rest args)
                 (and (eq command 'theme) (memq nil args))))
-  (defun my-texpresso-this-file ()
-    "Start TeXpresso on the file of this buffer, not on `TeX-master'.
-Its reruns are on: after a pause, if the .aux file changed, it typesets
-again with the previous pass's references.  Dyad is turned off in this
-buffer, so that saving does not also compile with latexmk next to
-TeXpresso; `M-x dyad-mode' turns it back on."
-    (interactive)
-    (when (bound-and-true-p dyad-mode)
-      (dyad-mode -1))
-    (texpresso (buffer-file-name))
-    (when (process-live-p texpresso--process)
-      (texpresso--send 'rerun t)))
-  (defun my-texpresso-rerun ()
-    "Have TeXpresso typeset once more with the previous pass's .aux file,
-as a second pdflatex pass would (beamer's total slide count, the table of
-contents, \\ref)."
-    (interactive)
-    (if (process-live-p texpresso--process)
-        (texpresso--send 'rerun-once)
-      (message "TeXpresso is not running: M-x my-texpresso-this-file")))
-  (with-eval-after-load 'latex
-    (define-key LaTeX-mode-map (kbd "C-c r") #'my-texpresso-rerun)))
+  (require 'texpresso-view nil t))
 
 ;; The daemon (emacs.service) can start before the graphical session sets
 ;; WAYLAND_DISPLAY, and then wl-copy, wl-paste and every other program it

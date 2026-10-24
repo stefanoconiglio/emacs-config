@@ -18,11 +18,16 @@ restart it (`systemctl --user restart emacs`) once everything is saved.
   Two are not on an archive and come from their repositories through `use-package :vc`:
   ampl-mode (github.com/ampl/ampl-mode) and claude-code-ide
   (github.com/manzaltu/claude-code-ide.el).
-- **Two checkouts**, loaded by the DYAD block in graphical Emacs and in the daemon:
-  - [dyad](https://github.com/stefanoconiglio/emacs-latex-dyad) at `~/repos/emacs-latex-dyad`: LaTeX source and
-    PDF side by side, kept in step both ways;
+- **Three checkouts**, loaded in graphical Emacs and in the daemon:
+  - [pdf-view-scroll-sync](https://github.com/stefanoconiglio/emacs-pdf-view-scroll-sync) at
+    `~/repos/emacs-pdf-view-scroll-sync` (the PDF-VIEW-SCROLL-SYNC block): LaTeX source and PDF side by side,
+    kept in step both ways;
   - [emacs-omarchy-theme](https://github.com/stefanoconiglio/emacs-omarchy-theme) at
-    `~/repos/emacs-omarchy-theme`: Emacs and its PDFs follow the Omarchy theme.
+    `~/repos/emacs-omarchy-theme` (same block): Emacs and its PDFs follow the Omarchy theme;
+  - [texpresso-view](https://github.com/stefanoconiglio/emacs-texpresso-view) at
+    `~/repos/emacs-texpresso-view` (the TEXPRESSO-VIEW block): `M-x texpresso-view`, the page re-typeset by
+    [TeXpresso](https://github.com/let-def/texpresso) as you type, beside the source; TeXpresso built in
+    `~/Installs/texpresso` with that package's patches.
 - **Some absolute paths** remain (the conda environments in `~/miniconda3/envs`, for instance).
 
 ## Claude Code in Emacs
