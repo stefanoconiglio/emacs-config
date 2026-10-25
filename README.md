@@ -47,6 +47,12 @@ opens its menu in graphical frames (a terminal cannot send `C-'` to `emacs -nw`)
   `claude` only when that is missing. The daemon started at boot has PATH
   `/usr/local/bin:/usr/bin`, without claude, and a later PATH finds Omarchy's `mise use` wrapper
   `~/.local/bin/claude` first.
+- **Its shell commands** see the daemon's PATH, `/usr/local/bin:/usr/bin` (Claude Code's bash
+  does not read `~/.bashrc`, which stops when not interactive): `init.el` adds `~/.local/bin`
+  and mise's shims (`~/.local/share/mise/shims`) after the rest, so your own commands, `typst`,
+  `tinymist` and `codex` are found and `/usr/bin/emacs` still comes before the wrapper in
+  `~/.local/bin`. An Emacs started from a terminal, whose PATH has both, is left as it is.
+- **`/voice`** works in its terminal: hold space to talk ("listening…").
 - **Terminal:** ghostel (MELPA), which draws Claude Code's screen with fewer glitches than vterm.
   Its native module is not in the package: Emacs offers to download it on first use, or run
   `M-x ghostel-download-module`. Terminal buffers (ghostel, vterm) have no line numbers.
