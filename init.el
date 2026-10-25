@@ -24,8 +24,9 @@
 ;;              '("melpa" . "http://melpa.org/packages/") t)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
 			 ("melpa-stable" . "https://stable.melpa.org/packages/")
-                         ("gnu" . "https://elpa.gnu.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")))
+                         ("gnu" . "https://elpa.gnu.org/packages/")))
+;; No orgmode.org/elpa: frozen since 2021, its org "20210929" outranks every
+;; Org on GNU ELPA (version-list-< compares 20210929 with 9).
 
 ;; Initializes the package infrastructure
 (package-initialize)
