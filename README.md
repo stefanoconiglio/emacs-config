@@ -18,12 +18,13 @@ restart it (`systemctl --user restart emacs`) once everything is saved.
   Two are not on an archive and come from their repositories through `use-package :vc`:
   ampl-mode (github.com/ampl/ampl-mode) and claude-code-ide
   (github.com/manzaltu/claude-code-ide.el).
-- **Three checkouts**, loaded in graphical Emacs and in the daemon:
+- **Three checkouts**, loaded in every Emacs (pdf-view-scroll-sync acts only in graphical frames):
   - [pdf-view-scroll-sync](https://github.com/stefanoconiglio/emacs-pdf-view-scroll-sync) at
     `~/repos/emacs-pdf-view-scroll-sync` (the PDF-VIEW-SCROLL-SYNC block): LaTeX source and PDF side by side,
     kept in step both ways;
   - [emacs-omarchy-theme](https://github.com/stefanoconiglio/emacs-omarchy-theme) at
-    `~/repos/emacs-omarchy-theme` (same block): Emacs and its PDFs follow the Omarchy theme;
+    `~/repos/emacs-omarchy-theme` (same block): Emacs and its PDFs follow the Omarchy theme, in graphical and
+    terminal Emacs alike;
   - [texpresso-view](https://github.com/stefanoconiglio/emacs-texpresso-view) at
     `~/repos/emacs-texpresso-view` (the TEXPRESSO-VIEW block): `M-x texpresso-view`, the page re-typeset by
     [TeXpresso](https://github.com/let-def/texpresso) as you type, beside the source; TeXpresso built in
@@ -37,6 +38,19 @@ In `emacsclient -t` or `emacs -nw` the mouse works through `xterm-mouse-mode`, a
 frames keep `mouse-wheel-scroll-amount` (a touchpad sends many events), and Shift and Control with the wheel do
 what they did in both. To change the step: `(setq my-tty-wheel-lines 5)`; to drop it:
 `(advice-remove 'mwheel-scroll #'my-tty-wheel-scroll)`.
+
+Terminal Emacs follows the Omarchy theme as graphical Emacs does: Modus with the theme's palette, changed when
+`omarchy theme set` runs, so the text stays readable after a switch between light and dark, and texpresso-view's
+page takes the new colours. In foot, `emacs -nw` draws them exactly (24-bit colour, from foot's
+`COLORTERM=truecolor`). The daemon's terminal frames (`emacsclient -t`) draw 24-bit colour only when the daemon
+itself was started with `COLORTERM=truecolor` (Emacs reads it from its own environment, not the client's); without
+it they get the nearest of the terminal's 256 colours. One way, a drop-in for `emacs.service`:
+
+```
+mkdir -p ~/.config/systemd/user/emacs.service.d
+printf '[Service]\nEnvironment=COLORTERM=truecolor\n' > ~/.config/systemd/user/emacs.service.d/colorterm.conf
+systemctl --user daemon-reload   # then restart the daemon once everything is saved
+```
 
 ## Claude Code in Emacs
 
