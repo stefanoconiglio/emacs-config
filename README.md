@@ -30,6 +30,14 @@ restart it (`systemctl --user restart emacs`) once everything is saved.
     `~/Installs/texpresso` with that package's patches.
 - **Some absolute paths** remain (the conda environments in `~/miniconda3/envs`, for instance).
 
+## Terminal frames
+
+In `emacsclient -t` or `emacs -nw` the mouse works through `xterm-mouse-mode`, and a notch of the wheel scrolls
+`my-tty-wheel-lines` lines (3; a terminal sends one wheel event a notch, which scrolled a single line). Graphical
+frames keep `mouse-wheel-scroll-amount` (a touchpad sends many events), and Shift and Control with the wheel do
+what they did in both. To change the step: `(setq my-tty-wheel-lines 5)`; to drop it:
+`(advice-remove 'mwheel-scroll #'my-tty-wheel-scroll)`.
+
 ## Claude Code in Emacs
 
 claude-code-ide runs Claude Code in a terminal inside Emacs and tells it which file is open and

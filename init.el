@@ -826,6 +826,22 @@ pdf-tools does it by itself, except while text is selected in the PDF."
 ;; mouse suport in emacs --nw
 (xterm-mouse-mode 1)
 
+;; The wheel in a terminal frame (25 Oct 2026): foot sends one event a notch,
+;; which scrolled a single line; there a notch scrolls `my-tty-wheel-lines'.
+;; Graphical frames keep `mouse-wheel-scroll-amount' (a touchpad sends many
+;; events), and the modifiers (S- hscroll, C- zoom) are kept everywhere.
+(defvar my-tty-wheel-lines 3
+  "Lines one mouse-wheel event scrolls in a terminal frame.")
+(defun my-tty-wheel-scroll (orig event &rest args)
+  "Call ORIG (`mwheel-scroll') on EVENT, by `my-tty-wheel-lines' in a terminal."
+  (let* ((win (posn-window (event-start event)))
+         (mouse-wheel-scroll-amount
+          (if (and (windowp win) (not (display-graphic-p (window-frame win))))
+              (cons my-tty-wheel-lines (cdr mouse-wheel-scroll-amount))
+            mouse-wheel-scroll-amount)))
+    (apply orig event args)))
+(advice-add 'mwheel-scroll :around #'my-tty-wheel-scroll)
+
 ;; claude-code-ide: Claude Code in a terminal, told which file is open and which
 ;; region is selected (https://github.com/manzaltu/claude-code-ide.el).
 ;; M-x claude-code-ide starts it for the current project; C-c C-' opens its
