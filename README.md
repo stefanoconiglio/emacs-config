@@ -14,7 +14,7 @@ restart it (`systemctl --user restart emacs`) once everything is saved.
 
 ## What it needs
 
-- **Packages** from MELPA and GNU ELPA, installed on first start (`use-package :ensure`).
+- **Packages** from MELPA, MELPA Stable and GNU ELPA, installed on first start (`use-package :ensure`).
   Two are not on an archive and come from their repositories through `use-package :vc`:
   ampl-mode (github.com/ampl/ampl-mode) and claude-code-ide
   (github.com/manzaltu/claude-code-ide.el).
