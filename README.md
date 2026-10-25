@@ -15,15 +15,9 @@ restart it (`systemctl --user restart emacs`) once everything is saved.
 ## What it needs
 
 - **Packages** from MELPA, MELPA Stable and GNU ELPA, installed on first start (`use-package :ensure`).
-  Three are not on an archive and come from their repositories through `use-package :vc`:
-  ampl-mode (github.com/ampl/ampl-mode), claude-code-ide
-  (github.com/manzaltu/claude-code-ide.el) and typst-ts-mode
-  (codeberg.org/meow_king/typst-ts-mode).
-- **Typst:** `typst` and `tinymist` (Typst's language server) installed with mise, found by their
-  shims in `~/.local/share/mise/shims`; the Typst tree-sitter grammar in `~/.emacs.d/tree-sitter`
-  (`M-x treesit-install-language-grammar RET typst RET`). A `.typ` file opens in typst-ts-mode
-  with errors and completion from tinymist (eglot), and `typst-ts-watch-mode` recompiles its PDF
-  on every save.
+  Two are not on an archive and come from their repositories through `use-package :vc`:
+  ampl-mode (github.com/ampl/ampl-mode) and claude-code-ide
+  (github.com/manzaltu/claude-code-ide.el).
 - **Three checkouts**, loaded in graphical Emacs and in the daemon:
   - [pdf-view-scroll-sync](https://github.com/stefanoconiglio/emacs-pdf-view-scroll-sync) at
     `~/repos/emacs-pdf-view-scroll-sync` (the PDF-VIEW-SCROLL-SYNC block): LaTeX source and PDF side by side,
@@ -49,9 +43,11 @@ opens its menu in graphical frames (a terminal cannot send `C-'` to `emacs -nw`)
   `~/.local/bin/claude` first.
 - **Its shell commands** see the daemon's PATH, `/usr/local/bin:/usr/bin` (Claude Code's bash
   does not read `~/.bashrc`, which stops when not interactive): `init.el` adds `~/.local/bin`
-  and mise's shims (`~/.local/share/mise/shims`) after the rest, so your own commands, `typst`,
-  `tinymist` and `codex` are found and `/usr/bin/emacs` still comes before the wrapper in
+  and mise's shims (`~/.local/share/mise/shims`) after the rest, so your own commands and what
+  mise installs are found and `/usr/bin/emacs` still comes before the wrapper in
   `~/.local/bin`. An Emacs started from a terminal, whose PATH has both, is left as it is.
+- **Its edits** show at once: buffers follow their files when they change on disk
+  (`global-auto-revert-mode`, checked every second).
 - **`/voice`** works in its terminal: hold space to talk ("listening…").
 - **Terminal:** ghostel (MELPA), which draws Claude Code's screen with fewer glitches than vterm.
   Its native module is not in the package: Emacs offers to download it on first use, or run

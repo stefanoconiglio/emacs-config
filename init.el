@@ -667,9 +667,9 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 ;; The daemon (emacs.service) has PATH /usr/local/bin:/usr/bin, and the bash
 ;; of the programs it runs (Claude Code's commands among them) does not read
 ;; ~/.bashrc, which stops at once when not interactive.  Add ~/.local/bin
-;; (the user's commands) and mise's shims (typst, tinymist, node...) after
-;; the rest, so that /usr/bin/emacs and /usr/bin/env still come first
-;; (~/.local/bin holds wrappers of both).
+;; (the user's commands) and mise's shims (node and the other programs mise
+;; installs) after the rest, so that /usr/bin/emacs and /usr/bin/env still
+;; come first (~/.local/bin holds wrappers of both).
 (dolist (dir (list (expand-file-name "~/.local/bin")
                    (expand-file-name "~/.local/share/mise/shims")))
   (when (and (file-directory-p dir)
@@ -826,37 +826,6 @@ pdf-tools does it by itself, except while text is selected in the PDF."
 ;; mouse suport in emacs --nw
 (xterm-mouse-mode 1)
 
-;; ai-code-interface.el
-(use-package ai-code
-  ;; :straight (:host github :repo "tninja/ai-code-interface.el") ;; if you want to use straight to install, no need to have MELPA setting above
-  :config
-  ;; use codex as backend, other options are 'claude-code, 'gemini, 'github-copilot-cli, 'opencode, 'kilo, 'grok, 'cursor, 'kiro, 'codebuddy, 'aider, 'eca, 'agent-shell, 'claude-code-ide, 'claude-code-el
-  (ai-code-set-backend 'codex)
-  ;; Optional: default menu stays unchanged; use a narrower 2-column layout on smaller frames
-  ;; (setq ai-code-menu-layout 'two-columns)
-  ;; Enable global keybinding for the main menu
-  (global-set-key (kbd "C-c a") #'ai-code-menu)
-  ;; Optional: Use eat if you prefer, by default it is vterm
-  ;; (setq ai-code-backends-infra-terminal-backend 'eat) ;; config for native CLI backends. for external backends such as agent-shell, claude-code-ide.el and claude-code.el, please check their own config
-  ;; Optional: Try ghostel as an experimental backend infra
-  ;; (setq ai-code-backends-infra-terminal-backend 'ghostel)
-  ;; Optional: Disable @ file completion in comments and AI sessions
-  ;; (ai-code-prompt-filepath-completion-mode -1)
-  ;; Optional: Ask AI to run test after code changes, for a tighter build-test loop
-  (setq ai-code-auto-test-type 'ask-me)
-  ;; Optional: Offer numbered next steps for discussion prompts at send time
-  ;; Customize `ai-code-discussion-auto-follow-up-enabled` to non-nil
-  ;; or set it directly like this:
-  ;; (setq ai-code-discussion-auto-follow-up-enabled t)
-  ;; Optional: In AI session buffers, SPC in Evil normal state triggers the prompt-enter UI
-  (with-eval-after-load 'evil (ai-code-backends-infra-evil-setup))
-  ;; Optional: Turn on auto-revert buffer, so that the AI code change automatically appears in the buffer
-  (global-auto-revert-mode 1)
-  (setq auto-revert-interval 1) ;; set to 1 second for faster update
-  ;; Optional: Set up Magit integration for AI commands in Magit popups
-  (with-eval-after-load 'magit
-    (ai-code-magit-setup-transients)))
-
 ;; claude-code-ide: Claude Code in a terminal, told which file is open and which
 ;; region is selected (https://github.com/manzaltu/claude-code-ide.el).
 ;; M-x claude-code-ide starts it for the current project; C-c C-' opens its
@@ -906,6 +875,11 @@ pdf-tools does it by itself, except while text is selected in the PDF."
   (setq claude-code-ide-use-side-window nil)
   (claude-code-ide-emacs-tools-setup))
 
+;; Buffers follow their files when something else changes them on disk
+;; (Claude Code's edits), checked every second
+(global-auto-revert-mode 1)
+(setq auto-revert-interval 1)
+
 
 ;; open auctex buffer always at the bo1
 (add-to-list 'display-buffer-alist
@@ -914,47 +888,3 @@ pdf-tools does it by itself, except while text is selected in the PDF."
                (side . bottom)
                (slot . 0)
                (window-height . 0.1)))
-
-;; Typst (.typ files, e.g. the slides ported from Obsidian by Hololith):
-;; colours and indentation from typst-ts-mode (installed from its git
-;; repository on Codeberg: it is not on MELPA), which needs the Typst
-;; tree-sitter grammar (~/.emacs.d/tree-sitter/libtree-sitter-typst.so; to
-;; rebuild it: M-x treesit-install-language-grammar RET typst RET).
-;; Errors underlined as you type and completion of the document's functions
-;; come from tinymist, Typst's language server (installed with mise), through
-;; eglot, with company's list as in LaTeX.
-;; To see the slides: typst-ts-watch-mode (on by default, " [Watch]" in the
-;; mode line; M-x typst-ts-watch-mode turns it off) runs `typst watch`, which
-;; recompiles the PDF on every save, with its errors in *Typst-Watch*; zathura
-;; shows the PDF and reloads it by itself.  Not on Hololith's theme.typ, a
-;; library of functions with no slides of its own.
-(use-package typst-ts-mode
-  :vc (:url "https://codeberg.org/meow_king/typst-ts-mode" :rev :newest)
-  :mode "\\.typ\\'"
-  :config
-  ;; typst by its mise shim's full path, for an Emacs started from the launcher
-  (let ((typst (expand-file-name "~/.local/share/mise/shims/typst")))
-    (when (file-executable-p typst)
-      (setq typst-ts-compile-executable-location typst)))
-  :init
-  (with-eval-after-load 'treesit
-    (add-to-list 'treesit-language-source-alist
-                 '(typst "https://github.com/uben0/tree-sitter-typst"))))
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               `(typst-ts-mode . (,(expand-file-name "~/.local/share/mise/shims/tinymist")))))
-(defun my-typst-completion ()
-  "Errors and completion in a Typst buffer: tinymist through eglot, company's list."
-  (when (file-executable-p (expand-file-name "~/.local/share/mise/shims/tinymist"))
-    (setq-local company-backends '(company-capf)
-                company-idle-delay 0.2
-                company-minimum-prefix-length 1)
-    (company-mode 1)
-    (eglot-ensure)))
-(add-hook 'typst-ts-mode-hook #'my-typst-completion)
-(defun my-typst-watch ()
-  "Recompile the PDF on every save: typst-ts-watch-mode, on unless the file is a theme."
-  (when (and buffer-file-name
-             (not (string= (file-name-nondirectory buffer-file-name) "theme.typ")))
-    (typst-ts-watch-mode 1)))
-(add-hook 'typst-ts-mode-hook #'my-typst-watch)
