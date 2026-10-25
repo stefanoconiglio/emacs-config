@@ -664,6 +664,19 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
                 (and (eq command 'theme) (memq nil args))))
   (require 'texpresso-view nil t))
 
+;; The daemon (emacs.service) has PATH /usr/local/bin:/usr/bin, and the bash
+;; of the programs it runs (Claude Code's commands among them) does not read
+;; ~/.bashrc, which stops at once when not interactive.  Add ~/.local/bin
+;; (the user's commands) and mise's shims (typst, tinymist, node...) after
+;; the rest, so that /usr/bin/emacs and /usr/bin/env still come first
+;; (~/.local/bin holds wrappers of both).
+(dolist (dir (list (expand-file-name "~/.local/bin")
+                   (expand-file-name "~/.local/share/mise/shims")))
+  (when (and (file-directory-p dir)
+             (not (member dir (split-string (or (getenv "PATH") "") ":" t))))
+    (setenv "PATH" (concat (getenv "PATH") ":" dir))
+    (setq exec-path (append (butlast exec-path) (list dir) (last exec-path)))))
+
 ;; The daemon (emacs.service) can start before the graphical session sets
 ;; WAYLAND_DISPLAY, and then wl-copy, wl-paste and every other program it
 ;; runs cannot reach the desktop.  Take it from the first client frame that
