@@ -44,7 +44,8 @@ Terminal Emacs follows the Omarchy theme as graphical Emacs does: Modus with the
 page takes the new colours. It does so when the terminal has 24-bit colour (foot, herdr and ghostel set
 `COLORTERM=truecolor`); a terminal with fewer colours keeps its own, as before. The daemon's terminal frames (`emacsclient -t`) draw 24-bit colour only when the daemon
 itself was started with `COLORTERM=truecolor` (Emacs reads it from its own environment, not the client's); without
-it they get the nearest of the terminal's 256 colours. One way, a drop-in for `emacs.service`:
+it they get the nearest of the terminal's 256 colours. My machine has it as a drop-in for `emacs.service`
+(`~/.config/systemd/user/emacs.service.d/colorterm.conf`); to make it:
 
 ```
 mkdir -p ~/.config/systemd/user/emacs.service.d
