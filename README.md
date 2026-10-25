@@ -15,9 +15,15 @@ restart it (`systemctl --user restart emacs`) once everything is saved.
 ## What it needs
 
 - **Packages** from MELPA, MELPA Stable and GNU ELPA, installed on first start (`use-package :ensure`).
-  Two are not on an archive and come from their repositories through `use-package :vc`:
-  ampl-mode (github.com/ampl/ampl-mode) and claude-code-ide
-  (github.com/manzaltu/claude-code-ide.el).
+  Three are not on an archive and come from their repositories through `use-package :vc`:
+  ampl-mode (github.com/ampl/ampl-mode), claude-code-ide
+  (github.com/manzaltu/claude-code-ide.el) and typst-ts-mode
+  (codeberg.org/meow_king/typst-ts-mode).
+- **Typst:** `typst` and `tinymist` (Typst's language server) installed with mise, found by their
+  shims in `~/.local/share/mise/shims`; the Typst tree-sitter grammar in `~/.emacs.d/tree-sitter`
+  (`M-x treesit-install-language-grammar RET typst RET`). A `.typ` file opens in typst-ts-mode
+  with errors and completion from tinymist (eglot), and `typst-ts-watch-mode` recompiles its PDF
+  on every save.
 - **Three checkouts**, loaded in graphical Emacs and in the daemon:
   - [pdf-view-scroll-sync](https://github.com/stefanoconiglio/emacs-pdf-view-scroll-sync) at
     `~/repos/emacs-pdf-view-scroll-sync` (the PDF-VIEW-SCROLL-SYNC block): LaTeX source and PDF side by side,
