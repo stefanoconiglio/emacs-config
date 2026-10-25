@@ -623,8 +623,9 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 ;; following `omarchy theme set'.
 ;; https://github.com/stefanoconiglio/emacs-omarchy-theme (~/repos/emacs-omarchy-theme)
 ;; In every Emacs: graphical, the daemon, and terminal Emacs (emacs -nw) since
-;; 25 Oct 2026, where foot draws 24-bit colour; there the theme also keeps the
-;; text readable after a light/dark switch and recolours texpresso-view's page.
+;; 25 Oct 2026 when its terminal has 24-bit colour (foot, herdr, ghostel); there
+;; the theme also keeps the text readable after a light/dark switch and
+;; recolours texpresso-view's page.  A terminal with fewer colours keeps its own.
 ;; ===============================
 ;; ===============================
 (add-to-list 'load-path "~/repos/emacs-pdf-view-scroll-sync")
@@ -632,7 +633,8 @@ if ($img -ne $null) { $img.Save('%s'); exit 0 } else { exit 1 }\""
 (when (require 'pdf-view-scroll-sync nil t)
   (add-hook 'LaTeX-mode-hook
             (lambda () (when (display-graphic-p) (pdf-view-scroll-sync-mode 1)))))
-(when (require 'omarchy-follow nil t)
+(when (and (or (display-graphic-p) (daemonp) (>= (display-color-cells) 16777216))
+           (require 'omarchy-follow nil t))
   (omarchy-follow-mode 1))
 
 ;; ===============================

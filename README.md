@@ -41,8 +41,8 @@ what they did in both. To change the step: `(setq my-tty-wheel-lines 5)`; to dro
 
 Terminal Emacs follows the Omarchy theme as graphical Emacs does: Modus with the theme's palette, changed when
 `omarchy theme set` runs, so the text stays readable after a switch between light and dark, and texpresso-view's
-page takes the new colours. In foot, `emacs -nw` draws them exactly (24-bit colour, from foot's
-`COLORTERM=truecolor`). The daemon's terminal frames (`emacsclient -t`) draw 24-bit colour only when the daemon
+page takes the new colours. It does so when the terminal has 24-bit colour (foot, herdr and ghostel set
+`COLORTERM=truecolor`); a terminal with fewer colours keeps its own, as before. The daemon's terminal frames (`emacsclient -t`) draw 24-bit colour only when the daemon
 itself was started with `COLORTERM=truecolor` (Emacs reads it from its own environment, not the client's); without
 it they get the nearest of the terminal's 256 colours. One way, a drop-in for `emacs.service`:
 
