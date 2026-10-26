@@ -53,6 +53,18 @@ printf '[Service]\nEnvironment=COLORTERM=truecolor\n' > ~/.config/systemd/user/e
 systemctl --user daemon-reload   # then restart the daemon once everything is saved
 ```
 
+## Auto-save
+
+Emacs keeps a copy of every changed buffer, written every 5 seconds of idleness or 100 keystrokes
+(`auto-save-timeout`, `auto-save-interval`), so a crash or a killed daemon loses seconds of work. The copies,
+`#…#` files named after the file's whole path, all go in `~/.emacs.d/auto-save/` (made with mode 700 if
+missing): none lands beside your files or in a synced Drive folder. Saving the buffer deletes its copy.
+Backups (`~` files) stay off.
+
+To bring work back after a crash, open the file again: Emacs says it has recent auto-save data. Then
+`M-x recover-file` (that file) or `M-x recover-session` (every buffer of the Emacs that died) shows the copy;
+check it, then save. To turn auto-save off again: `(setq auto-save-default nil)`.
+
 ## Claude Code in Emacs
 
 claude-code-ide runs Claude Code in a terminal inside Emacs and tells it which file is open and
