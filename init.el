@@ -270,8 +270,16 @@
 ;; ~/.emacs.d/init.el links into a Git repository: visit the target without asking
 (setq vc-follow-symlinks t)
 
-;; stop creating #..# files
-(setq auto-save-default nil)
+;; AUTO-SAVE: on, every few seconds, its #..# files all in ~/.emacs.d/auto-save/ (never beside
+;; the file, nor in Drive); bring one back with M-x recover-file or M-x recover-session
+(let ((dir (expand-file-name "auto-save/" user-emacs-directory)))
+  (unless (file-directory-p dir)
+    (make-directory dir t)
+    (set-file-modes dir #o700))
+  (setq auto-save-file-name-transforms `((".*" ,dir t))))
+(setq auto-save-default t
+      auto-save-timeout 5
+      auto-save-interval 100)
 
 
 ;; ;; to ctrl+v images into Latex
