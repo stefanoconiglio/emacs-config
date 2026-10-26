@@ -61,6 +61,10 @@ Emacs keeps a copy of every changed buffer, written every 5 seconds of idleness 
 missing): none lands beside your files or in a synced Drive folder. Saving the buffer deletes its copy.
 Backups (`~` files) stay off.
 
+The files themselves are saved too: `auto-save-visited-mode` writes every changed buffer to its file after 5
+seconds of idleness (`auto-save-visited-interval`), so there is no need to save by hand; in a Drive folder each
+such save is synced by Insync. To stop it: `(auto-save-visited-mode -1)`.
+
 To bring work back after a crash, open the file again: Emacs says it has recent auto-save data. Then
 `M-x recover-file` (that file) or `M-x recover-session` (every buffer of the Emacs that died) shows the copy;
 check it, then save. To turn auto-save off again: `(setq auto-save-default nil)`.
