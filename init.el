@@ -280,6 +280,8 @@
 (setq auto-save-default t
       auto-save-timeout 5
       auto-save-interval 100)
+;; and the files themselves, after 5 s idle (auto-save-visited-interval): no need to save by hand
+(auto-save-visited-mode 1)
 
 
 ;; ;; to ctrl+v images into Latex
